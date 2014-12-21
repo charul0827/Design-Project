@@ -1,0 +1,10 @@
+diff a/RobotSwarmServer/Program.cs b/RobotSwarmServer/Program.cs	(rejected hunks)
+@@ -11,7 +11,7 @@
+     public static class Program
+     {
+         // Number of robots needs to be changed prior to start of application
+-        public static int numberOfRobots = 6;
++        public static int numberOfRobots = 4;
+ 
+         // Parameters, these can be changed from the application
+         public static double transmissionRangeScaling = 11;
