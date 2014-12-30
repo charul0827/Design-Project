@@ -38,8 +38,12 @@ namespace RobotSwarmServer
          */
         public override void calculateNextMove(DoublePoint robotPosition, double speed, DoublePoint heading, List<Robot> neighbors, out double referenceSpeed, out DoublePoint referenceHeading)
         {
-            //referenceSpeed = speed;
+            //referenceSpeed = speed;   //uncomment if using m3pi robots
+
+            //$$$$$Changes/Additions for RC cars$$$$$//
             referenceSpeed = Program.testSpeed;
+            //$$$$$$$$$$//
+
             referenceHeading = heading;
 
             if (referencePoint != null)
@@ -78,10 +82,14 @@ namespace RobotSwarmServer
 
         private double speedRegulator(double distance)
         {
+            //uncomment the below lines if using m3pi robots
             //double maxSpeed = 100;   //Max is approximately 100
             //double pSpeed = 200;    //200 is a standard value
+            //return Math.Min(maxSpeed, pSpeed * Math.Abs(distance) / Program.resolution.X);
 
-            return Program.testSpeed; // Math.Min(maxSpeed, pSpeed * Math.Abs(distance) / Program.resolution.X);
+            //$$$$$Changes/Additions for RC cars$$$$$//
+            return Program.testSpeed;
+            //$$$$$$$$$$//
         }
 
         public override ControlStrategy cloneStrategy()

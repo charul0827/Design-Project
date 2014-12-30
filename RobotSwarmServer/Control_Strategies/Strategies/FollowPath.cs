@@ -30,7 +30,11 @@ namespace RobotSwarmServer.Control_Strategies.Strategies
 
         Boolean onLine = false;
         private int pointCount = 0;
-        private int direction = 1;
+        //private int direction = 1;    //uncomment if using m3pi robots
+        
+        //$$$$$Changes/Additions for RC cars$$$$$//
+        private int direction;
+        //$$$$$$$$$$//
 
         protected int closeUpLimit;
 
@@ -42,7 +46,7 @@ namespace RobotSwarmServer.Control_Strategies.Strategies
             : base(name)
         {
             this.points = points;
-            direction = 1;
+            //direction = 1;    //uncomment if using m3pi robots    
 
             this.closeUpLimit = closeUpLimit;
 
@@ -62,6 +66,7 @@ namespace RobotSwarmServer.Control_Strategies.Strategies
         public void setDirection(int direction)
         {
             this.direction = direction;
+            
         }
 
         /*
@@ -93,7 +98,7 @@ namespace RobotSwarmServer.Control_Strategies.Strategies
                     return;
                 }
             }
-
+            
             if (onLine)
             {
                 double distance = robotPosition.DistanceTo(points[pointCount]);
@@ -105,7 +110,8 @@ namespace RobotSwarmServer.Control_Strategies.Strategies
                     }
                     else
                     {
-                        pointCount = (pointCount >= 1 ? points.Count() - 1 : pointCount + direction);
+                        //pointCount = (pointCount >= 1 ? points.Count() - 1 : pointCount + direction);
+                        pointCount = (pointCount > 1 ? pointCount - 1 : points.Count() - 1);
                     }
                 }
 
@@ -139,6 +145,7 @@ namespace RobotSwarmServer.Control_Strategies.Strategies
         private void directionBox_CheckedChanged(object sender, EventArgs e)
         {
             setDirection(-direction);
+           
         }
 
         public override void paintStrategy(System.Drawing.Graphics g, DoublePoint scaling)
@@ -254,6 +261,7 @@ namespace RobotSwarmServer.Control_Strategies.Strategies
             directionBox.Text = "Direction";
             directionBox.Location = new System.Drawing.Point(10, 20);
             directionBox.CheckedChanged += directionBox_CheckedChanged;
+            
 
             this.getStrategySettingsBox().Controls.Add(directionBox);
         }
