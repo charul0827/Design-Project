@@ -30,10 +30,10 @@ namespace RobotSwarmServer.Control_Strategies.Strategies
 
         Boolean onLine = false;
         private int pointCount = 0;
-        //private int direction = 1;    //uncomment if using m3pi robots
+        private int direction = 1;    //uncomment if using m3pi robots
         
         //$$$$$Changes/Additions for RC cars$$$$$//
-        private int direction;
+        //private int direction;
         //$$$$$$$$$$//
 
         protected int closeUpLimit;

@@ -11,6 +11,8 @@ using System.Collections.Generic;
 
 using AForge;
 using RobotSwarmServer.Control_Strategies;
+using RobotSwarmServer.Control_Strategies.Strategies;
+//using RobotSwarmServer.Control_Strategies.ControlStrategy;
 
 namespace RobotSwarmServer
 {
@@ -42,6 +44,7 @@ namespace RobotSwarmServer
         private IntPoint[] cornerArray = new IntPoint[4];
 
         int[] tempMotorSignals = new int[2];
+        A2B avoidObstacle = new A2B();
 
         public ControlStrategy currentStrategy;
 
@@ -225,11 +228,19 @@ namespace RobotSwarmServer
             // Run collision avoidance code to check if robot is blocked.
             blocked = false;
             blocked = isBlocked();
+            AForge.DoublePoint[] obstaclePath;
 
             if (blocked)
             {
                 //setMotorSignals(new int[2] { 0, 0 });
+                //stop
                 setMotorSignals(new int[2] { Program.neutralSpeed, Program.neutralSteer });
+                //create half circle points on safe distance around obstable
+                obstaclePath = RobotSwarmServer.Control_Strategies.Strategies.FollowPath.createCirclePoints(Program.robotRadius, neighbors[0].getPosition(), 10);
+                //go around obstacle
+                for (int i=0; i<5; i++){
+                    avoidObstacle.calculateNextMove(position, speed, heading, neighbors, out referenceSpeed, out referenceHeading);
+                }
                 Console.WriteLine("This is blocked");
             }
             else
@@ -279,7 +290,7 @@ namespace RobotSwarmServer
         }
         
         //$$$$$Changes/Additions made for RC cars$$$$$//
-        // ----------------- Controller method -----------------NOT DONE YET
+        // ----------------- Controller method -----------------
         /// <summary>RC car controller, bicycle model</summary>
         private int[] controller(double speed, DoublePoint heading, DoublePoint referenceHeading)// , double referenceSpeed, DoublePoint referenceHeading)
         {
@@ -349,7 +360,8 @@ namespace RobotSwarmServer
             else
             {
                 double angleVoltage;
-                angleVoltage = (delta + 0.2026) / 0.1413;
+                //angleVoltage = (delta + 0.2026) / 0.1413;
+                angleVoltage = (delta + 0.6372) / 0.4971;
                 Console.WriteLine("delta changes");
                 // convert to PWM
                 angleControl = angleVoltage * 51;

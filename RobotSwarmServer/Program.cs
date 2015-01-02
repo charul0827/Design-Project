@@ -19,11 +19,16 @@ namespace RobotSwarmServer
         
         //$$$$$Changes/additions for RC car$$$$$//
         //PWM constants for RC-car
-        public static int neutralSpeed = 74;
+        /*public static int neutralSpeed = 74;
         public static int neutralSteer = 76;
-        public static int testSpeed = 60;
+        public static int testSpeed = 60;*/
+        public static int neutralSpeed = 125;
+        public static int neutralSteer = 76;
+        public static int testSpeed = 103;
+
         public static int minSpeed = 40;
-        public static int maxSpeed = 100;
+        //public static int maxSpeed = 100;
+        public static int maxSpeed = 130;
         public static int minSteer = 10;
         public static int maxSteer = 134;
         //$$$$$$$$$$//

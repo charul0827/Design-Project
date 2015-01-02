@@ -86,10 +86,11 @@ namespace RobotSwarmServer
                 this.activeStrategy.Text = Program.strategyList[strategyNumber].getName();
                 Program.settings.updateControlStrategySettings();
 
-                foreach (Robot rob in Program.robotList)
+               foreach (Robot rob in Program.robotList)
                 {
                     rob.setStrategy(Program.strategyList[strategyNumber]);
                 }
+               // Program.robotList[0].setStrategy(Program.strategyList[strategyNumber]);
 
                 Program.mainFrame.logStrategyData();
             }
