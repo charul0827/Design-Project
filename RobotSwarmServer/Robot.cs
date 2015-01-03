@@ -39,8 +39,11 @@ namespace RobotSwarmServer
         private int[] motorSignals = new int[2]; // L,R
         private bool detected = false;
         private bool blocked = false;
+        private bool blocktime = false;
         private int previousTime = Environment.TickCount;
         private IntPoint[] cornerArray = new IntPoint[4];
+        double finalPositionX = 0;
+        double finalPositionY = 0;
 
         int[] tempMotorSignals = new int[2];
         A2B avoidObstacle = new A2B();
@@ -236,13 +239,95 @@ namespace RobotSwarmServer
                 
                 //$$$$$Changes/Additions for RC car$$$$$//
                 setMotorSignals(new int[2] { Program.neutralSpeed, Program.neutralSteer });
-                //create half circle points on safe distance around obstable
-                obstaclePath = RobotSwarmServer.Control_Strategies.Strategies.FollowPath.createCirclePoints(Program.robotRadius, neighbors[0].getPosition(), 10);
-                //go around obstacle
-                for (int i=0; i<5; i++){
-                    avoidObstacle.calculateNextMove(position, speed, heading, neighbors, out referenceSpeed, out referenceHeading);
+                
+                if (!blocktime)
+                {
+                    finalPositionX = 2*neighbors[0].getPosition().X - position.X;
+                    finalPositionY = 2*neighbors[0].getPosition().Y - position.Y;
+                    blocktime = true;
                 }
-                Console.WriteLine("This is blocked");
+                
+                //create half circle points on safe distance around obstable
+                int nrPointsObsAvoid = 10;
+                obstaclePath = RobotSwarmServer.Control_Strategies.Strategies.FollowPath.createCirclePoints(Program.robotRadius, neighbors[0].getPosition(), nrPointsObsAvoid);
+                //go around obstacle
+                int point = 0;
+                int closeUpLimitObst = 100;
+                int ijk = 0;
+
+                Boolean onLineObst = false;
+
+                if (Math.Abs(finalPositionX - position.X) > 100 || Math.Abs(finalPositionY - position.Y) > 100)
+                {
+                    if (!onLineObst)
+                    {
+                        point = 0;
+                        double distance = position.DistanceTo(obstaclePath[point]);
+
+                        for (int i = 0; i < nrPointsObsAvoid; i++)
+                        {
+                            if (distance > obstaclePath[i].DistanceTo(position))
+                            {
+                                point = i;
+                                distance = obstaclePath[point].DistanceTo(position);
+                            }
+                        }
+                        if (distance < closeUpLimitObst)
+                        {
+                            onLineObst = true;
+                        }
+                        else
+                        {
+                            avoidObstacle.calculateNextMove(obstaclePath[point], position, speed, heading, neighbors, out referenceSpeed, out referenceHeading);
+
+                        }
+                    }
+                    if (onLineObst)
+                    {
+                        double distance = position.DistanceTo(obstaclePath[point]);
+                        if (distance < closeUpLimitObst)
+                        {
+                            point = (point >= nrPointsObsAvoid - 1 ? 0 : point + 1);
+                        }
+                        avoidObstacle.calculateNextMove(obstaclePath[point], position, speed, heading, neighbors, out referenceSpeed, out referenceHeading);
+                    }
+
+                    //referenceSpeed = speed;
+                    referenceSpeed = Program.testSpeed;
+                    referenceHeading = heading;
+
+
+                    //////////////////////////////////////////////////////////////////////////////////////////
+                    /*ijk = ijk + 1;
+                    double distObstAvoidPoints = position.DistanceTo(obstaclePath[point]);
+                    
+                    for (int i = 0; i < nrPointsObsAvoid; i++)
+                    {
+                        if (distObstAvoidPoints > obstaclePath[i].DistanceTo(position))
+                        {
+                            point = i;
+                            distObstAvoidPoints = obstaclePath[point].DistanceTo(position);
+                        }
+                    } 
+                    
+                    if (distObstAvoidPoints < 100)
+                    {
+                        point = (point >= nrPointsObsAvoid - 1 ? 0 : point + 1);
+                        avoidObstacle.calculateNextMove(obstaclePath[point], position, speed, heading, neighbors, out referenceSpeed, out referenceHeading);
+                        Console.WriteLine("inside the if loop");
+                    }*/
+                    Console.WriteLine("speed" + speed);
+                    setMotorSignals(controller(speed, heading, referenceHeading));
+                    Console.WriteLine("Stuck in while loop");
+                    Console.WriteLine(ijk);
+                }
+                else
+                {
+                    setStrategy(new StandStill());
+                    blocktime = true;
+                }
+                //Console.WriteLine("This is blocked");
+                
                 //$$$$$$$$$$//
             }
             else
@@ -353,13 +438,13 @@ namespace RobotSwarmServer
             {
                 tempMotorSignals[0] = (int)Program.neutralSpeed;
                 tempMotorSignals[1] = (int)Program.neutralSteer;
-                Console.WriteLine("delta is NaN");
+                //Console.WriteLine("delta is NaN");
                 return tempMotorSignals;
             }
             else if (delta == 0)
             {
                 angleControl = Program.neutralSteer;
-                Console.WriteLine("delta is 0");
+                //Console.WriteLine("delta is 0");
                 //angleControl = neutralSteer;
             }
             else
@@ -367,7 +452,7 @@ namespace RobotSwarmServer
                 double angleVoltage;
                 //angleVoltage = (delta + 0.2026) / 0.1413; //car 2
                 angleVoltage = (delta + 0.6372) / 0.4971;   //car 1
-                Console.WriteLine("delta changes");
+                //Console.WriteLine("delta changes");
                 // convert to PWM
                 angleControl = angleVoltage * 51;
             }

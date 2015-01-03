@@ -87,7 +87,7 @@ namespace RobotSwarmServer.Control_Strategies.Strategies
                         distance = points[pointCount].DistanceTo(robotPosition);
                     }
                 }
-
+                Console.WriteLine(closeUpLimit);
                 if (distance < closeUpLimit)
                 {
                     onLine = true;
@@ -210,14 +210,19 @@ namespace RobotSwarmServer.Control_Strategies.Strategies
             return rectanglePoints;
         }
 
-        public static DoublePoint[] createLinePoints(DoublePoint startPoint, DoublePoint stopPoint)
+        public static DoublePoint[] createLinePoints(DoublePoint startPoint, DoublePoint stopPoint, int nrPoints)
         {
-            DoublePoint[] linePoints = new DoublePoint[2];
+            DoublePoint[] linePoints = new DoublePoint[nrPoints];
 
-            linePoints[0] = startPoint;
-            
-            linePoints[1] = stopPoint;
-            
+            double distanceX = Math.Abs(stopPoint.X - startPoint.X)/nrPoints;
+            double distanceY = Math.Abs(stopPoint.Y - startPoint.Y)/nrPoints;
+
+            for (int i = 0; i < nrPoints; i++)
+            {
+                linePoints[i].X = startPoint.X + i * distanceX;
+                linePoints[i].Y = startPoint.Y + i * distanceY;
+            }
+                        
             return linePoints;
         }
 

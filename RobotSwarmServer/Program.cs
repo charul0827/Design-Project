@@ -33,6 +33,8 @@ namespace RobotSwarmServer
         public static int minSpeed = 40;       
         public static int minSteer = 10;
         public static int maxSteer = 134;
+
+        
         //$$$$$$$$$$//
 
         // Parameters, these can be changed from the application

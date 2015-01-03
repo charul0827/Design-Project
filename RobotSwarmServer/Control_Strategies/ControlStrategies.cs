@@ -54,7 +54,7 @@ namespace RobotSwarmServer
             Program.strategyList.Add(new FlockingDemostration(350));
             Program.strategyList.Add(new FollowPath("Follow Ellipse", FollowPath.createEllipsePoints(750, 350, new AForge.DoublePoint(1920 / 2, 1080 / 2), 30)));
             //Program.strategyList.Add(new FollowPath("Follow Ellipse", FollowPath.createEllipsePoints(750, 350, new AForge.DoublePoint(1920 / 2, 1080 / 2), 15)));
-            Program.strategyList.Add(new FollowPath("Follow Line", FollowPath.createLinePoints(new AForge.DoublePoint(750, 350), new AForge.DoublePoint(1500, 350))));
+            Program.strategyList.Add(new FollowPath("Follow Line", FollowPath.createLinePoints(new AForge.DoublePoint(100, 1080/2), new AForge.DoublePoint(1700, 1080/2), 10)));
             //..add strategies here
 
             loadStrategyList();
