@@ -12,7 +12,6 @@ using System.Collections.Generic;
 using AForge;
 using RobotSwarmServer.Control_Strategies;
 using RobotSwarmServer.Control_Strategies.Strategies;
-//using RobotSwarmServer.Control_Strategies.ControlStrategy;
 
 namespace RobotSwarmServer
 {
@@ -207,7 +206,7 @@ namespace RobotSwarmServer
             {
                 Console.WriteLine("I'm not detected");
                 //return new int[2] { 0, 0 };
-              return new int[2] { Program.neutralSpeed, Program.neutralSteer };
+                return new int[2] { Program.neutralSpeed, Program.neutralSteer };
                 //return motorSignals;
             }
         }
@@ -232,8 +231,10 @@ namespace RobotSwarmServer
 
             if (blocked)
             {
-                //setMotorSignals(new int[2] { 0, 0 });
+                //setMotorSignals(new int[2] { 0, 0 }); //uncomment if using m3pi robots
                 //stop
+                
+                //$$$$$Changes/Additions for RC car$$$$$//
                 setMotorSignals(new int[2] { Program.neutralSpeed, Program.neutralSteer });
                 //create half circle points on safe distance around obstable
                 obstaclePath = RobotSwarmServer.Control_Strategies.Strategies.FollowPath.createCirclePoints(Program.robotRadius, neighbors[0].getPosition(), 10);
@@ -242,11 +243,15 @@ namespace RobotSwarmServer
                     avoidObstacle.calculateNextMove(position, speed, heading, neighbors, out referenceSpeed, out referenceHeading);
                 }
                 Console.WriteLine("This is blocked");
+                //$$$$$$$$$$//
             }
             else
             {
-              //  setMotorSignals(controller(speed, heading, referenceSpeed, referenceHeading));
-                setMotorSignals(controller(speed, heading, referenceHeading));
+                //setMotorSignals(controller(speed, heading, referenceSpeed, referenceHeading));    //uncomment if using m3pi robots
+                
+                //$$$$$Changes/Additions for RC cars$$$$$//
+                setMotorSignals(controller(speed, heading, referenceHeading));  
+                //$$$$$$$$$$//
                
             }
         }
@@ -299,9 +304,9 @@ namespace RobotSwarmServer
             double delta;
             double beta;
             double angleControl;
-            // calculate psi
+            //calculate psi
             psi = Math.Atan2(heading.Y, heading.X);   // angle in radians -pi<=psi<=pi
-            // theta does it matter if this is in different directions????
+            //theta does it matter if this is in different directions????
             theta = Math.Atan2(referenceHeading.Y, referenceHeading.X); // angle in radians -pi<=theta<=pi
             if (Double.IsNaN(psi) || Double.IsNaN(theta))
             {
@@ -314,7 +319,7 @@ namespace RobotSwarmServer
                 {
                     beta = beta - Math.Sign(beta) * 2 * Math.PI;
                 }
-                double deltaTemp = Math.Atan((Math.Tan(beta) * (lF + lR)) / lR);  // angle in radians -pi/2<=delta<=pi/2
+                double deltaTemp = Math.Atan((Math.Tan(beta) * (lF + lR)) / lR);  //angle in radians -pi/2<=delta<=pi/2
                 if (Double.IsNaN(deltaTemp))
                 {
                     delta = double.NaN;
@@ -360,8 +365,8 @@ namespace RobotSwarmServer
             else
             {
                 double angleVoltage;
-                //angleVoltage = (delta + 0.2026) / 0.1413;
-                angleVoltage = (delta + 0.6372) / 0.4971;
+                //angleVoltage = (delta + 0.2026) / 0.1413; //car 2
+                angleVoltage = (delta + 0.6372) / 0.4971;   //car 1
                 Console.WriteLine("delta changes");
                 // convert to PWM
                 angleControl = angleVoltage * 51;
@@ -390,7 +395,7 @@ namespace RobotSwarmServer
 
             tempMotorSignals[0] = (int)speedControl;
             tempMotorSignals[1] = (int)angleControl;
-            // Fix contol signals if smaller/larger than min/max allowed value
+            //Fix contol signals if smaller/larger than min/max allowed value
 
             return tempMotorSignals;
         }

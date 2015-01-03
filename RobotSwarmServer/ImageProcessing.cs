@@ -132,8 +132,12 @@ namespace RobotSwarmServer
 
                 if (Program.robotPhysicalRadius == 0)
                 {
-                    //Program.robotPhysicalRadius = (int)((tempPointArray[0].DistanceTo(tempPointArray[2])) / 2);
+                    //Program.robotPhysicalRadius = (int)((tempPointArray[0].DistanceTo(tempPointArray[2])) / 2);   //uncomment if using m3pi robots
+
+                    //$$$$$Changes/Additions for RC cars$$$$$//
                     Program.robotPhysicalRadius = (int)((tempPointArray[0].DistanceTo(tempPointArray[2])) );
+                    //$$$$$$$$$$//
+
                     Program.robotRadius = (int)(Program.robotRadiusScaling * Program.robotPhysicalRadius);
                     Program.transmissionRange = (int)(Program.transmissionRangeScaling * Program.robotPhysicalRadius);
                     Program.dispersionRange = (int)(Program.dispersionRangeScaling * Program.robotPhysicalRadius);
