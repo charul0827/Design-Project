@@ -13,6 +13,14 @@ using AForge;
 using RobotSwarmServer.Control_Strategies;
 using RobotSwarmServer.Control_Strategies.Strategies;
 
+using System.ComponentModel;
+using System.Drawing;
+using System.Data;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
 namespace RobotSwarmServer
 {
     public partial class Robot
@@ -230,115 +238,50 @@ namespace RobotSwarmServer
             // Run collision avoidance code to check if robot is blocked.
             blocked = false;
             blocked = isBlocked();
-            AForge.DoublePoint[] obstaclePath;
+            //AForge.DoublePoint[] obstaclePath;
 
             if (blocked)
             {
                 //setMotorSignals(new int[2] { 0, 0 }); //uncomment if using m3pi robots
                 //stop
-                
+
                 //$$$$$Changes/Additions for RC car$$$$$//
-                setMotorSignals(new int[2] { Program.neutralSpeed, Program.neutralSteer });
-                
-                if (!blocktime)
+                if (neighbors[0].getID() != 0)  //The updateRobot() function is called separately for each robot; therefore a new obstacle avoidance strategy needs to be set only for glyph 0.                          
                 {
-                    finalPositionX = 2*neighbors[0].getPosition().X - position.X;
-                    finalPositionY = 2*neighbors[0].getPosition().Y - position.Y;
-                    blocktime = true;
-                }
-                
-                //create half circle points on safe distance around obstable
-                int nrPointsObsAvoid = 10;
-                obstaclePath = RobotSwarmServer.Control_Strategies.Strategies.FollowPath.createCirclePoints(Program.robotRadius, neighbors[0].getPosition(), nrPointsObsAvoid);
-                //go around obstacle
-                int point = 0;
-                int closeUpLimitObst = 100;
-                int ijk = 0;
-
-                Boolean onLineObst = false;
-
-                if (Math.Abs(finalPositionX - position.X) > 100 || Math.Abs(finalPositionY - position.Y) > 100)
-                {
-                    if (!onLineObst)
+                    if (!blocktime) //The first time obstacle is detected, calculate the final point until which obstacle avoidance strategy needs to be valid.
                     {
-                        point = 0;
-                        double distance = position.DistanceTo(obstaclePath[point]);
-
-                        for (int i = 0; i < nrPointsObsAvoid; i++)
-                        {
-                            if (distance > obstaclePath[i].DistanceTo(position))
-                            {
-                                point = i;
-                                distance = obstaclePath[point].DistanceTo(position);
-                            }
-                        }
-                        if (distance < closeUpLimitObst)
-                        {
-                            onLineObst = true;
-                        }
-                        else
-                        {
-                            avoidObstacle.calculateNextMove(obstaclePath[point], position, speed, heading, neighbors, out referenceSpeed, out referenceHeading);
-
-                        }
+                        finalPositionX = 2 * neighbors[0].getPosition().X - position.X;
+                        finalPositionY = 2 * neighbors[0].getPosition().Y - position.Y;
+                        blocktime = true;
                     }
-                    if (onLineObst)
+                    int nrPointsObsAvoid = 15;
+                    DoublePoint positionObst = neighbors[0].getPosition();
+                    
+                    if (Math.Abs(finalPositionX - position.X) > 300 || Math.Abs(finalPositionY - position.Y) > 300)
                     {
-                        double distance = position.DistanceTo(obstaclePath[point]);
-                        if (distance < closeUpLimitObst)
-                        {
-                            point = (point >= nrPointsObsAvoid - 1 ? 0 : point + 1);
-                        }
-                        avoidObstacle.calculateNextMove(obstaclePath[point], position, speed, heading, neighbors, out referenceSpeed, out referenceHeading);
+                        setStrategy(new FollowPath("Avoid Obstacle", FollowPath.createCirclePoints(Program.robotRadius, positionObst, nrPointsObsAvoid)));  //obstacle avoidance path.
                     }
-
-                    //referenceSpeed = speed;
-                    referenceSpeed = Program.testSpeed;
-                    referenceHeading = heading;
-
-
-                    //////////////////////////////////////////////////////////////////////////////////////////
-                    /*ijk = ijk + 1;
-                    double distObstAvoidPoints = position.DistanceTo(obstaclePath[point]);
-                    
-                    for (int i = 0; i < nrPointsObsAvoid; i++)
+                    else
                     {
-                        if (distObstAvoidPoints > obstaclePath[i].DistanceTo(position))
-                        {
-                            point = i;
-                            distObstAvoidPoints = obstaclePath[point].DistanceTo(position);
-                        }
-                    } 
-                    
-                    if (distObstAvoidPoints < 100)
-                    {
-                        point = (point >= nrPointsObsAvoid - 1 ? 0 : point + 1);
-                        avoidObstacle.calculateNextMove(obstaclePath[point], position, speed, heading, neighbors, out referenceSpeed, out referenceHeading);
-                        Console.WriteLine("inside the if loop");
-                    }*/
-                    Console.WriteLine("speed" + speed);
-                    setMotorSignals(controller(speed, heading, referenceHeading));
-                    Console.WriteLine("Stuck in while loop");
-                    Console.WriteLine(ijk);
+                        currentStrategy = Program.strategyList.ElementAt(Program.activeStrategyId);   //After completing half-circle, the robot should continue on it's previous path as set in GUI.
+                        //setStrategy(new StandStill());    //or stop
+                    }
                 }
                 else
                 {
-                    setStrategy(new StandStill());
-                    blocktime = true;
-                }
-                //Console.WriteLine("This is blocked");
-                
+                    setStrategy(new StandStill());  //For the obstacle, keep the strategy as StandStill.                   
+                }                
                 //$$$$$$$$$$//
             }
-            else
-            {
+            //else  //uncomment if using m3pi robots
+            //{ //uncomment if using m3pi robots
                 //setMotorSignals(controller(speed, heading, referenceSpeed, referenceHeading));    //uncomment if using m3pi robots
                 
                 //$$$$$Changes/Additions for RC cars$$$$$//
                 setMotorSignals(controller(speed, heading, referenceHeading));  
                 //$$$$$$$$$$//
-               
-            }
+
+            //} //uncomment if using m3pi robots
         }
         // ----------------- Collision Avoidance method -----------------
 
