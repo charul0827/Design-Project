@@ -30,12 +30,8 @@ namespace RobotSwarmServer.Control_Strategies.Strategies
 
         Boolean onLine = false;
         private int pointCount = 0;
-        private int direction = 1;    //uncomment if using m3pi robots
+        private int direction = 1;    
         
-        //$$$$$Changes/Additions for RC cars$$$$$//
-        //private int direction;
-        //$$$$$$$$$$//
-
         protected int closeUpLimit;
 
         public FollowPath(string name, DoublePoint[] points)
@@ -46,7 +42,7 @@ namespace RobotSwarmServer.Control_Strategies.Strategies
             : base(name)
         {
             this.points = points;
-            //direction = 1;    //uncomment if using m3pi robots    
+            direction = 1;   
 
             this.closeUpLimit = closeUpLimit;
 
@@ -87,7 +83,7 @@ namespace RobotSwarmServer.Control_Strategies.Strategies
                         distance = points[pointCount].DistanceTo(robotPosition);
                     }
                 }
-                Console.WriteLine(closeUpLimit);
+
                 if (distance < closeUpLimit)
                 {
                     onLine = true;
@@ -102,7 +98,7 @@ namespace RobotSwarmServer.Control_Strategies.Strategies
             if (onLine)
             {
                 double distance = robotPosition.DistanceTo(points[pointCount]);
-                if (distance < closeUpLimit)
+                if (distance <= closeUpLimit)
                 {
                     if (direction == 1)
                     {
@@ -110,10 +106,15 @@ namespace RobotSwarmServer.Control_Strategies.Strategies
                     }
                     else
                     {
-                        //pointCount = (pointCount >= 1 ? points.Count() - 1 : pointCount + direction);
-                        pointCount = (pointCount > 1 ? pointCount - 1 : points.Count() - 1);
+                        pointCount = (pointCount >= 1 ? points.Count() - 1 : pointCount + direction);
+                        //pointCount = (pointCount > 1 ? pointCount - 1 : points.Count() - 1);  //Shouldn't it be this?
                     }
                 }
+                else
+                {
+                    onLine = false;
+                }
+
 
                 goToPoint.calculateNextMove(points[pointCount], robotPosition, speed, heading, neighbors, out referenceSpeed, out referenceHeading);
                 if (fifoStrategy != null)
@@ -123,8 +124,12 @@ namespace RobotSwarmServer.Control_Strategies.Strategies
                 return;
             }
 
-            //referenceSpeed = speed;
+            //referenceSpeed = speed;   //uncomment if using m3pi robots
+
+            //$$$$$Changes/Additions made for RC cars$$$$$//
             referenceSpeed = Program.testSpeed;
+            //$$$$$$$$$$//
+
             referenceHeading = heading;
         }
 
@@ -214,15 +219,15 @@ namespace RobotSwarmServer.Control_Strategies.Strategies
         {
             DoublePoint[] linePoints = new DoublePoint[nrPoints];
 
-            double distanceX = Math.Abs(stopPoint.X - startPoint.X)/nrPoints;
-            double distanceY = Math.Abs(stopPoint.Y - startPoint.Y)/nrPoints;
+            double distanceX = Math.Abs(stopPoint.X - startPoint.X) / nrPoints;
+            double distanceY = Math.Abs(stopPoint.Y - startPoint.Y) / nrPoints;
 
             for (int i = 0; i < nrPoints; i++)
             {
                 linePoints[i].X = startPoint.X + i * distanceX;
                 linePoints[i].Y = startPoint.Y + i * distanceY;
             }
-                        
+
             return linePoints;
         }
 

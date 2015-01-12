@@ -9,8 +9,12 @@
 using System;
 using System.Collections.Generic;
 
+using System.IO;
+
 using AForge;
 using RobotSwarmServer.Control_Strategies;
+
+
 using RobotSwarmServer.Control_Strategies.Strategies;
 
 using System.ComponentModel;
@@ -47,14 +51,14 @@ namespace RobotSwarmServer
         private int[] motorSignals = new int[2]; // L,R
         private bool detected = false;
         private bool blocked = false;
-        private bool blocktime = false;
         private int previousTime = Environment.TickCount;
         private IntPoint[] cornerArray = new IntPoint[4];
+
         double finalPositionX = 0;
         double finalPositionY = 0;
+        private bool blocktime = false;
 
         int[] tempMotorSignals = new int[2];
-        A2B avoidObstacle = new A2B();
 
         public ControlStrategy currentStrategy;
 
@@ -215,10 +219,13 @@ namespace RobotSwarmServer
             }
             else
             {
-                Console.WriteLine("I'm not detected");
-                //return new int[2] { 0, 0 };
-                return new int[2] { Program.neutralSpeed, Program.neutralSteer };
+                //uncomment below lines if using m3pi robts
+                //return new int[2] { 0, 0 };   
                 //return motorSignals;
+
+                //$$$$$Changes/Additions made for RC cars$$$$$//
+                return new int[2] { Program.neutralSpeed, motorSignals[1] };
+                //$$$$$$$$$$//
             }
         }
 
@@ -238,52 +245,47 @@ namespace RobotSwarmServer
             // Run collision avoidance code to check if robot is blocked.
             blocked = false;
             blocked = isBlocked();
-            //AForge.DoublePoint[] obstaclePath;
 
             if (blocked)
             {
                 //setMotorSignals(new int[2] { 0, 0 }); //uncomment if using m3pi robots
-                //stop
 
                 //$$$$$Changes/Additions for RC car$$$$$//
+                setMotorSignals(new int[2] { Program.neutralSpeed, motorSignals[1] });
                 if (neighbors[0].getID() != 0)  //The updateRobot() function is called separately for each robot; therefore a new obstacle avoidance strategy needs to be set only for glyph 0.                          
-                {
-                    if (!blocktime) //The first time obstacle is detected, calculate the final point until which obstacle avoidance strategy needs to be valid.
-                    {
-                        finalPositionX = 2 * neighbors[0].getPosition().X - position.X;
-                        finalPositionY = 2 * neighbors[0].getPosition().Y - position.Y;
-                        blocktime = true;
-                    }
-                    int nrPointsObsAvoid = 15;
-                    DoublePoint positionObst = neighbors[0].getPosition();
-                    
-                    if (Math.Abs(finalPositionX - position.X) > 300 || Math.Abs(finalPositionY - position.Y) > 300)
-                    {
-                        setStrategy(new FollowPath("Avoid Obstacle", FollowPath.createCirclePoints(Program.robotRadius, positionObst, nrPointsObsAvoid)));  //obstacle avoidance path.
-                    }
-                    else
-                    {
-                        currentStrategy = Program.strategyList.ElementAt(Program.activeStrategyId);   //After completing half-circle, the robot should continue on it's previous path as set in GUI.
-                        //setStrategy(new StandStill());    //or stop
-                    }
-                }
-                else
-                {
-                    setStrategy(new StandStill());  //For the obstacle, keep the strategy as StandStill.                   
-                }                
+                 {
+                     if (!blocktime) //The first time obstacle is detected, calculate the final point until which obstacle avoidance strategy needs to be valid.
+                     {
+                         finalPositionX = 2 * neighbors[0].getPosition().X - position.X;
+                         finalPositionY = 2 * neighbors[0].getPosition().Y - position.Y;
+                         blocktime = true;
+                     }
+                     int nrPointsObsAvoid = 15;
+                     DoublePoint positionObst = neighbors[0].getPosition();
+                     
+                      if (Math.Abs(finalPositionX - position.X) > 300 || Math.Abs(finalPositionY - position.Y) > 300)
+                      {
+                          setStrategy(new FollowPath("Avoid Obstacle", FollowPath.createEllipsePoints(200,100, positionObst, nrPointsObsAvoid)));  //obstacle avoidance path.
+                      }
+                      else
+                      {
+                          currentStrategy = Program.strategyList.ElementAt(Program.activeStrategyId);   //After completing half-circle, the robot should continue on it's previous path as set in GUI.
+                      }
+                  }
+                  else
+                  {
+                      setStrategy(new StandStill());  //For the obstacle, keep the strategy as StandStill.   
+                 }     
                 //$$$$$$$$$$//
             }
             //else  //uncomment if using m3pi robots
             //{ //uncomment if using m3pi robots
-                //setMotorSignals(controller(speed, heading, referenceSpeed, referenceHeading));    //uncomment if using m3pi robots
-                
-                //$$$$$Changes/Additions for RC cars$$$$$//
-                setMotorSignals(controller(speed, heading, referenceHeading));  
-                //$$$$$$$$$$//
-
+              //  setMotorSignals(controller(speed, heading, referenceSpeed, referenceHeading));    //uncomment if using m3pi robots
+                setMotorSignals(controller(speed, heading, referenceHeading));
+               
             //} //uncomment if using m3pi robots
         }
-        // ----------------- Collision Avoidance method -----------------
+            // ----------------- Collision Avoidance method -----------------
 
         /// <summary> Method used to determine if robot is blocked </summary>
 
@@ -323,7 +325,7 @@ namespace RobotSwarmServer
         }
         
         //$$$$$Changes/Additions made for RC cars$$$$$//
-        // ----------------- Controller method -----------------
+        // ----------------- Controller method -----------------NOT DONE YET
         /// <summary>RC car controller, bicycle model</summary>
         private int[] controller(double speed, DoublePoint heading, DoublePoint referenceHeading)// , double referenceSpeed, DoublePoint referenceHeading)
         {
@@ -332,9 +334,10 @@ namespace RobotSwarmServer
             double delta;
             double beta;
             double angleControl;
-            //calculate psi
+            string mydocpath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            // calculate psi
             psi = Math.Atan2(heading.Y, heading.X);   // angle in radians -pi<=psi<=pi
-            //theta does it matter if this is in different directions????
+            // theta does it matter if this is in different directions????
             theta = Math.Atan2(referenceHeading.Y, referenceHeading.X); // angle in radians -pi<=theta<=pi
             if (Double.IsNaN(psi) || Double.IsNaN(theta))
             {
@@ -347,7 +350,21 @@ namespace RobotSwarmServer
                 {
                     beta = beta - Math.Sign(beta) * 2 * Math.PI;
                 }
-                double deltaTemp = Math.Atan((Math.Tan(beta) * (lF + lR)) / lR);  //angle in radians -pi/2<=delta<=pi/2
+
+
+                // write to textfile TEST
+                // Set a variable to the My Documents path. 
+               
+
+                FileStream fs1 = new FileStream(mydocpath + @"\beta.txt", FileMode.OpenOrCreate, FileAccess.Write);
+                StreamWriter writer = new StreamWriter(fs1);
+                writer.BaseStream.Seek(0, SeekOrigin.End);
+                writer.WriteLine(beta);
+                writer.Close();
+
+
+
+                double deltaTemp = Math.Atan((Math.Tan(beta) * (lF + lR)) / lR);  // angle in radians -pi/2<=delta<=pi/2
                 if (Double.IsNaN(deltaTemp))
                 {
                     delta = double.NaN;
@@ -358,20 +375,17 @@ namespace RobotSwarmServer
                 }
             }
 
-            // Moving average filter
-            saveDelta(delta);
-            double tempDelta = 0;
-            int samples = 0;
-            if (!Double.IsNaN(delta))
-            {
-                for (int i = 0; i < deltaList.Count; i++)
-                {
-                    tempDelta += deltaList[i];
-                    samples += i;
+            // write to textfile TEST
+            // Set a variable to the My Documents path. 
+            // string mydocpath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
-                }
-                delta = tempDelta / samples;
-            }
+            FileStream fs2 = new FileStream(mydocpath + @"\delta.txt", FileMode.OpenOrCreate, FileAccess.Write);
+            StreamWriter writer2 = new StreamWriter(fs2);
+            writer2.BaseStream.Seek(0, SeekOrigin.End);
+            writer2.WriteLine(delta);
+            writer2.Close();
+
+
 
                        //##########################################################################################################
             // ------------------------------DO WE NEED TO LOOK IF ANGLES CHANGES SIGN?---------------------------------
@@ -381,21 +395,21 @@ namespace RobotSwarmServer
             {
                 tempMotorSignals[0] = (int)Program.neutralSpeed;
                 tempMotorSignals[1] = (int)Program.neutralSteer;
-                //Console.WriteLine("delta is NaN");
+                Console.WriteLine("delta is NaN");
                 return tempMotorSignals;
             }
             else if (delta == 0)
             {
                 angleControl = Program.neutralSteer;
-                //Console.WriteLine("delta is 0");
+                Console.WriteLine("delta is 0");
                 //angleControl = neutralSteer;
             }
             else
             {
                 double angleVoltage;
-                //angleVoltage = (delta + 0.2026) / 0.1413; //car 2
-                angleVoltage = (delta + 0.6372) / 0.4971;   //car 1
-                //Console.WriteLine("delta changes");
+                //angleVoltage = (delta + 0.2026) / 0.1413; //car2
+                angleVoltage = (delta + 0.6372) / 0.4971;   //car1
+                Console.WriteLine("delta changes");
                 // convert to PWM
                 angleControl = angleVoltage * 51;
             }
@@ -423,7 +437,7 @@ namespace RobotSwarmServer
 
             tempMotorSignals[0] = (int)speedControl;
             tempMotorSignals[1] = (int)angleControl;
-            //Fix contol signals if smaller/larger than min/max allowed value
+            // Fix contol signals if smaller/larger than min/max allowed value
 
             return tempMotorSignals;
         }

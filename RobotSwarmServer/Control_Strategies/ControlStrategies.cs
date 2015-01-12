@@ -52,9 +52,8 @@ namespace RobotSwarmServer
             Program.strategyList.Add(new FollowPath("Follow Square", FollowPath.createRectanglePoints(new AForge.DoublePoint(200, 200), 800, 500)));
             Program.strategyList.Add(new FollowPath("Traffic with FIFO", FollowPath.createXYAxis8(400, new AForge.DoublePoint(964, 543), 5), new FIFO(new CollisionArea(new Point(864,443),new Size(200,200)))));
             Program.strategyList.Add(new FlockingDemostration(350));
-            Program.strategyList.Add(new FollowPath("Follow Ellipse", FollowPath.createEllipsePoints(750, 350, new AForge.DoublePoint(1920 / 2, 1080 / 2), 30)));
-            //Program.strategyList.Add(new FollowPath("Follow Ellipse", FollowPath.createEllipsePoints(750, 350, new AForge.DoublePoint(1920 / 2, 1080 / 2), 15)));
-            Program.strategyList.Add(new FollowPath("Follow Line", FollowPath.createLinePoints(new AForge.DoublePoint(100, 1080/2), new AForge.DoublePoint(1700, 1080/2), 10)));
+            Program.strategyList.Add(new FollowPath("Follow Ellipse", FollowPath.createEllipsePoints(700, 300, new AForge.DoublePoint(1920 / 2, 1080 / 2), 30)));
+            Program.strategyList.Add(new FollowPath("Follow Line", FollowPath.createLinePoints(new AForge.DoublePoint(100, 1080 / 2), new AForge.DoublePoint(1700, 1080 / 2), 40)));
             //..add strategies here
 
             loadStrategyList();
@@ -86,11 +85,10 @@ namespace RobotSwarmServer
                 this.activeStrategy.Text = Program.strategyList[strategyNumber].getName();
                 Program.settings.updateControlStrategySettings();
 
-               foreach (Robot rob in Program.robotList)
+                foreach (Robot rob in Program.robotList)
                 {
                     rob.setStrategy(Program.strategyList[strategyNumber]);
                 }
-               // Program.robotList[0].setStrategy(Program.strategyList[strategyNumber]);
 
                 Program.mainFrame.logStrategyData();
             }

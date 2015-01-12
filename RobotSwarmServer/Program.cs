@@ -12,29 +12,27 @@ namespace RobotSwarmServer
     public static class Program
     {
         // Number of robots needs to be changed prior to start of application
-        public static int numberOfRobots = 2;   //default value of number of robots
+        public static int numberOfRobots = 1;   //default value of number of robots
 
         //The maximum speed of the m3pi robots
         public static double robotMaxSpeed = 100;
         
         //$$$$$Changes/additions for RC car$$$$$//
         //PWM constants for RC-car 2
-        public static int neutralSpeed = 74;
-        public static int neutralSteer = 76;
-        public static int testSpeed = 60;
-        public static int maxSpeed = 100;
+        /* public static int neutralSpeed = 74;
+         public static int neutralSteer = 76;
+         public static int testSpeed = 60;
+         public static int maxSpeed = 100;*/
 
         //PWM constants for RC-car 1
-        /*public static int neutralSpeed = 125;
+        public static int neutralSpeed = 125;
         public static int neutralSteer = 76;
         public static int testSpeed = 103;
-        public static int maxSpeed = 130;*/
+        public static int maxSpeed = 130;
 
-        public static int minSpeed = 40;       
+        public static int minSpeed = 40;
         public static int minSteer = 10;
         public static int maxSteer = 134;
-
-        
         //$$$$$$$$$$//
 
         // Parameters, these can be changed from the application

@@ -55,7 +55,7 @@ namespace RobotSwarmServer
                 throw new Exception("Reference point is not initiated");
             }
         }
-        /* 
+        /*
          * Two other methods in order to make the robots behave according to specific parameters.
          */
         public void calculateNextMove(DoublePoint referencePoint, DoublePoint robotPosition, double speed, DoublePoint heading, List<Robot> neighbors, out double referenceSpeed, out DoublePoint referenceHeading)
